@@ -1,4 +1,4 @@
-<template>
+<template lang='html'>
   <div class="login-page">
     <v-row>
       <v-col :cols="12">
@@ -25,27 +25,48 @@
             <p class="typo__p" v-if="submitStatus === 'OK'">Thanks for your submission!</p>
             <p class="typo__p" v-if="submitStatus === 'ERROR'">Please fill the form correctly.</p>
             <p class="typo__p" v-if="submitStatus === 'PENDING'">Sending...</p>
-            <v-btn class="mr-4" @click="submit" :disabled="submitStatus === 'PENDING'">submit</v-btn>
-            <v-btn @click="clear">clear</v-btn>
+            <div class="section-btn">
+               <v-btn  class="btn" @click="submit" :disabled="submitStatus === 'PENDING'">submit</v-btn>
+               <v-btn  class="clr-btn btn" @click="clear">clear</v-btn>
+            </div>
           </form>
         </div>
       </v-col>
     </v-row>
+    <v-row>
+      <div id="firebaseui-auth-container" class="m-auto"></div>
+    </v-row>
   </div>
 </template>
-
-
 
 <script>
 import { validationMixin } from "vuelidate";
 import { required, email } from "vuelidate/lib/validators";
-
+import * as firebase from "firebase";
+import * as firebaseui from "firebaseui";
 export default {
   name: "Login",
   mixins: [validationMixin],
   validations: {
     email: { required, email },
     password: { required }
+  },
+  mounted() {
+    var uiConfig = {
+      signInSuccessUrl: "/home",
+      signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        firebase.auth.FacebookAuthProvider.PROVIDER_ID
+      ]
+    };
+    if(firebaseui.auth.AuthUI.getInstance()) {
+      const ui = firebaseui.auth.AuthUI.getInstance()
+      ui.start('#firebaseui-auth-container', uiConfig)
+    } else {
+      const ui = new firebaseui.auth.AuthUI(firebase.auth())
+      ui.start('#firebaseui-auth-container', uiConfig)
+    }
   },
   data: () => ({
     email: "123@gmail.com",
@@ -99,7 +120,7 @@ export default {
 
 <style lang="scss" slot-scope>
 .login-page {
-//   background-color: #edeeef;
+  //   background-color: #edeeef;
   height: 100%;
 }
 .login-form {
@@ -110,5 +131,23 @@ export default {
 .login-title {
   font-size: 30px;
   margin: 20px;
+}
+
+.section-btn {
+  width: 230px;
+  margin: auto;
+}
+
+.clr-btn {
+  float: right;
+}
+
+.btn {
+  width: 90px;
+  padding: 10px;
+}
+
+.m-auto {
+  margin: auto;
 }
 </style>
